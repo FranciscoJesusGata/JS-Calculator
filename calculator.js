@@ -20,13 +20,21 @@ function displayNumber(input) {
 }
 
 function addDecimals() {
+    if (calculator.waitingForSecondOperand)
+    {
+        calculator.displayValue = '.0';
+        calculator.waitingForSecondOperand = false;
+        return ;
+    }
     if (!calculator.displayValue.includes('.'))
         calculator.displayValue += '.';
 }
 
-function clearDisplay() {
+function clearDisplay(reset) {
     if (calculator.displayValue != '0')
         calculator.displayValue = '0'
+    if (reset)
+        resetCalculator();
 }
 
 function resetCalculator()
@@ -54,10 +62,14 @@ function operate(firstOperand, secondOperand, operator)
 
 function manageOperators(operator) {
     const operand = parseFloat(calculator.displayValue);
+    if (operator != 'equals' && calculator.waitingForSecondOperand) {
+        calculator.operator = operator;
+        return;
+    }
     if (calculator.firstOperand == null)
     {
         calculator.firstOperand = operand;
-        clearDisplay();
+        clearDisplay(false);
     }
     if (calculator.waitingForSecondOperand) {
         operate(calculator.firstOperand, operand, calculator.operator);
@@ -68,7 +80,6 @@ function manageOperators(operator) {
     }
     else
         resetCalculator();
-    console.log(calculator);
 }
 
 window.addEventListener('load', (e) =>
@@ -83,7 +94,7 @@ window.addEventListener('load', (e) =>
         else if (clicked.classList.contains('decimal'))
             addDecimals();
         else if (clicked.classList.contains('clear'))
-            clearDisplay();
+            clearDisplay(true);
         else
             displayNumber(clicked.value);
         updateDisplay();
